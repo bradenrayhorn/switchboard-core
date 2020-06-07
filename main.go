@@ -21,5 +21,9 @@ func startServer() {
 
 	registerRoutes(router)
 
-	router.Run()
+	err := router.Run()
+
+	if err != nil {
+		panic(err)
+	}
 }
