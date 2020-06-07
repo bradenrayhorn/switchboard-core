@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/bradenrayhorn/switchboard-backend/controllers"
+	"github.com/bradenrayhorn/switchboard-backend/middleware"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -11,4 +13,12 @@ func registerRoutes(router *gin.Engine) {
 		context.String(http.StatusOK, "ok")
 	})
 
+	auth := router.Group("/api/auth")
+	api := router.Group("/api")
+	api.Use(middleware.AuthMiddleware())
+
+	auth.POST("/login", controllers.Login)
+	auth.POST("/register", controllers.Register)
+
+	api.GET("/me", controllers.ShowMe)
 }
