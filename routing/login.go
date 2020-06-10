@@ -1,4 +1,4 @@
-package controllers
+package routing
 
 import (
 	"github.com/bradenrayhorn/switchboard-backend/repositories"
@@ -16,7 +16,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user, err := repositories.GetUser(request.Username)
+	user, err := repositories.User.GetUser(request.Username)
 
 	if err != nil {
 		utils.JsonError(http.StatusUnprocessableEntity, "invalid username/password", c)

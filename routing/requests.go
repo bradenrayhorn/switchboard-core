@@ -1,4 +1,4 @@
-package controllers
+package routing
 
 type LoginRequest struct {
 	Username string `form:"username" binding:"required"`

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/bradenrayhorn/switchboard-backend/config"
 	"github.com/bradenrayhorn/switchboard-backend/database"
-	"github.com/gin-gonic/gin"
+	"github.com/bradenrayhorn/switchboard-backend/routing"
 	"log"
 )
 
@@ -22,11 +22,9 @@ func main() {
 }
 
 func startServer() {
-	router := gin.Default()
+	r := routing.MakeRouter()
 
-	registerRoutes(router)
-
-	err := router.Run()
+	err := r.Run()
 
 	if err != nil {
 		panic(err)
