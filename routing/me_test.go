@@ -35,3 +35,15 @@ func TestShowMe(t *testing.T) {
 	_ = json.Unmarshal(w.Body.Bytes(), &body)
 	assert.Equal(t, user.ID.Hex(), body.Id)
 }
+
+func TestCannotShowMeUnauthenticated(t *testing.T) {
+	r := MakeRouter()
+
+	repositories.User = &repositories.MockUserRepository{}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/me", nil)
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
