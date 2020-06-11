@@ -27,3 +27,18 @@ func TestRegister(t *testing.T) {
 	assert.NotNil(t, user)
 	assert.Nil(t, err)
 }
+
+func TestCannotRegisterTwice(t *testing.T) {
+	r := MakeRouter()
+
+	repositories.User = &repositories.MockUserRepository{}
+	_, _ = repositories.User.CreateUser("test", "")
+
+	w := httptest.NewRecorder()
+	reader := strings.NewReader("username=test&password=password")
+	req, _ := http.NewRequest("POST", "/api/auth/register", reader)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+}
