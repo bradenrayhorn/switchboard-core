@@ -63,5 +63,5 @@ func TestParseToken(t *testing.T) {
 	assert.True(t, ok, "claims can be parsed")
 	assert.True(t, token.Valid, "token is valid")
 	assert.Equal(t, "test", claims["user_username"], "username matches")
-	assert.Equal(t, userId.String(), claims["user_id"], "user id matches")
+	assert.Equal(t, userId.Hex(), claims["user_id"], "user id matches")
 }

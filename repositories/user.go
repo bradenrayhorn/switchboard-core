@@ -5,6 +5,7 @@ import (
 	"github.com/Kamva/mgm/v3"
 	"github.com/bradenrayhorn/switchboard-backend/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var User UserRepository
@@ -58,6 +59,10 @@ type MockUserRepository struct {
 
 func (r *MockUserRepository) CreateUser(username string, hashedPassword string) (*models.User, error) {
 	user := &models.User{
+		DefaultModel: mgm.DefaultModel{
+			IDField:    mgm.IDField{ID: primitive.NewObjectID()},
+			DateFields: mgm.DateFields{},
+		},
 		Username: username,
 		Password: hashedPassword,
 	}
