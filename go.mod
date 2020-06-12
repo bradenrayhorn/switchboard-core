@@ -6,6 +6,7 @@ require (
 	github.com/Kamva/mgm/v3 v3.0.0-alpha.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.6.3
+	github.com/pkg/errors v0.8.1
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.4.0
 	go.mongodb.org/mongo-driver v1.1.3

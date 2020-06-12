@@ -45,10 +45,9 @@ func (r MongoUserRepository) Exists(username string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if cursor.Current == nil {
-		return false, nil
-	}
-	return true, cursor.Close(mgm.Ctx())
+	cursor.Next(mgm.Ctx())
+
+	return cursor.Current != nil, cursor.Close(mgm.Ctx())
 }
 
 // mock repository

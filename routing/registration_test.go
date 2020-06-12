@@ -10,7 +10,7 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	r := MakeRouter()
+	r := MakeTestRouter()
 
 	repositories.User = &repositories.MockUserRepository{}
 
@@ -29,7 +29,7 @@ func TestRegister(t *testing.T) {
 }
 
 func TestCannotRegisterTwice(t *testing.T) {
-	r := MakeRouter()
+	r := MakeTestRouter()
 
 	repositories.User = &repositories.MockUserRepository{}
 	_, _ = repositories.User.CreateUser("test", "")

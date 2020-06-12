@@ -7,3 +7,5 @@ func JsonError(code int, error string, c *gin.Context) {
 		"error": error,
 	})
 }
+
+type Json map[string]interface{}

@@ -32,7 +32,7 @@ func TestCannotLoginWithInvalidPassword(t *testing.T) {
 }
 
 func testLogin(t *testing.T, expectedStatus int, username string, password string) {
-	r := MakeRouter()
+	r := MakeTestRouter()
 	w := httptest.NewRecorder()
 	reader := strings.NewReader(fmt.Sprintf("username=%s&password=%s", username, password))
 	req, _ := http.NewRequest("POST", "/api/auth/login", reader)
