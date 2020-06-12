@@ -32,7 +32,7 @@ func Login(c *gin.Context) {
 	token, err := utils.CreateToken(user)
 	if err != nil {
 		log.Println(err.Error())
-		utils.JsonError(http.StatusUnprocessableEntity, "internal error", c)
+		utils.JsonError(http.StatusInternalServerError, "internal error", c)
 		return
 	}
 
