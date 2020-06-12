@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"github.com/pkg/errors"
-)
+import "errors"
 
 type HttpError struct {
 	Code  int
