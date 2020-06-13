@@ -4,7 +4,6 @@ import (
 	"github.com/bradenrayhorn/switchboard-backend/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,20 +28,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		token, err := utils.ParseToken(tokenString)
 
 		if err != nil {
-			log.Println(err.Error())
 			utils.JsonError(http.StatusUnauthorized, "invalid api token", c)
 			c.Abort()
 			return
 		}
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			c.Set("user_id", claims["user_id"])
-			c.Set("user_username", claims["user_username"])
-			c.Next()
-		} else {
-			utils.JsonError(http.StatusUnauthorized, "invalid api token", c)
-			c.Abort()
-			return
-		}
+		claims := token.Claims.(jwt.MapClaims)
+		c.Set("user_id", claims["user_id"])
+		c.Set("user_username", claims["user_username"])
+		c.Next()
 	}
 }
