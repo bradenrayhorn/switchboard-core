@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/spf13/viper"
 	"log"
+	"time"
 )
 
 func LoadConfig() {
@@ -13,6 +14,8 @@ func LoadConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Println(err.Error())
 	}
+
+	viper.SetDefault("token_expiration", time.Hour*24)
 
 	_ = viper.BindEnv("mongo_host", "MONGO_HOST")
 	_ = viper.BindEnv("mongo_port", "MONGO_PORT")

@@ -12,7 +12,7 @@ func CreateToken(user *models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_username": user.Username,
 		"user_id":       user.ID.Hex(),
-		"exp":           time.Now().Add(time.Hour * 24).Unix(),
+		"exp":           time.Now().Add(viper.GetDuration("token_expiration")).Unix(),
 	})
 
 	return token.SignedString([]byte(viper.GetString("jwt_secret")))
