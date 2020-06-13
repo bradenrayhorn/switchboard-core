@@ -20,6 +20,7 @@ type GetMeResponse struct {
 
 func TestShowMe(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.User = &repositories.MockUserRepository{}
 	user, _ := repositories.User.CreateUser("test", "$2a$10$naqzJWUaOFm1/512Od.wPO4H8Vh8K38IGAb7rtgFizSflLVhpgMRG")
@@ -40,6 +41,7 @@ func TestShowMe(t *testing.T) {
 
 func TestCannotShowMeUnauthenticated(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.User = &repositories.MockUserRepository{}
 
@@ -52,6 +54,7 @@ func TestCannotShowMeUnauthenticated(t *testing.T) {
 
 func TestCannotShowMeWithExpiredToken(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.User = &repositories.MockUserRepository{}
 	user, _ := repositories.User.CreateUser("test", "$2a$10$naqzJWUaOFm1/512Od.wPO4H8Vh8K38IGAb7rtgFizSflLVhpgMRG")

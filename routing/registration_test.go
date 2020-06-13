@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +14,7 @@ import (
 
 func TestRegister(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.User = &repositories.MockUserRepository{}
 
@@ -32,6 +34,7 @@ func TestRegister(t *testing.T) {
 
 func TestCannotRegisterTwice(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.User = &repositories.MockUserRepository{}
 	_, _ = repositories.User.CreateUser("test", "")
@@ -47,6 +50,7 @@ func TestCannotRegisterTwice(t *testing.T) {
 
 func TestCannotRegisterWithNoData(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/auth/register", nil)
@@ -66,6 +70,7 @@ func (r MockUserFailRepository) CreateUser(username string, hashedPassword strin
 
 func TestRegisterIfRepositoryFails(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.User = &MockUserFailRepository{}
 

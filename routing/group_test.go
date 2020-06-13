@@ -18,6 +18,7 @@ import (
 
 func TestCreateGroup(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.Group = &repositories.MockGroupRepository{}
 	repositories.User = &repositories.MockUserRepository{}
@@ -44,6 +45,7 @@ func TestCreateGroup(t *testing.T) {
 
 func TestCantCreateDuplicateGroup(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.Group = &repositories.MockGroupRepository{}
 	repositories.User = &repositories.MockUserRepository{}
@@ -67,6 +69,7 @@ func TestCantCreateDuplicateGroup(t *testing.T) {
 
 func TestCantCreateGroupWithoutMe(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.Group = &repositories.MockGroupRepository{}
 	repositories.User = &repositories.MockUserRepository{}
@@ -88,6 +91,7 @@ func TestCantCreateGroupWithoutMe(t *testing.T) {
 
 func TestCantCreateGroupWithoutUsers(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.Group = &repositories.MockGroupRepository{}
 	repositories.User = &repositories.MockUserRepository{}
@@ -111,6 +115,7 @@ type GetGroupsResponse struct {
 
 func TestGetGroups(t *testing.T) {
 	r := MakeTestRouter()
+	utils.SetupTestRsaKeys()
 
 	repositories.Group = &repositories.MockGroupRepository{}
 	repositories.User = &repositories.MockUserRepository{}

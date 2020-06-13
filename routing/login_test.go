@@ -3,6 +3,7 @@ package routing
 import (
 	"fmt"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -32,6 +33,7 @@ func TestCannotLoginWithInvalidPassword(t *testing.T) {
 }
 
 func testLogin(t *testing.T, expectedStatus int, username string, password string) {
+	utils.SetupTestRsaKeys()
 	r := MakeTestRouter()
 	w := httptest.NewRecorder()
 	reader := strings.NewReader(fmt.Sprintf("username=%s&password=%s", username, password))
