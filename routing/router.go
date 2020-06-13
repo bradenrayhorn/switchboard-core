@@ -4,13 +4,11 @@ import (
 	"github.com/bradenrayhorn/switchboard-core/middleware"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
 func MakeRouter() *gin.Engine {
 	router := gin.Default()
-	log.Println("MAKE ROUTER")
 	applyRoutes(router)
 	return router
 }
