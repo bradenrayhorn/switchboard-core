@@ -34,7 +34,7 @@ func Register(c *gin.Context) {
 
 	if err != nil {
 		log.Println(err)
-		utils.JsonError(http.StatusUnprocessableEntity, "failed to create user", c)
+		utils.JsonError(http.StatusInternalServerError, "failed to create user", c)
 		return
 	}
 
