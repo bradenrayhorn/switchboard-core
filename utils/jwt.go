@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/bradenrayhorn/switchboard-backend/models"
+	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 	"time"

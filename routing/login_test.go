@@ -2,7 +2,7 @@ package routing
 
 import (
 	"fmt"
-	"github.com/bradenrayhorn/switchboard-backend/repositories"
+	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"

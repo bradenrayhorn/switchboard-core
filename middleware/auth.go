@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/bradenrayhorn/switchboard-backend/utils"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"net/http"

@@ -3,7 +3,7 @@ package repositories
 import (
 	"errors"
 	"github.com/Kamva/mgm/v3"
-	"github.com/bradenrayhorn/switchboard-backend/models"
+	"github.com/bradenrayhorn/switchboard-core/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

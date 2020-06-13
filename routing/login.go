@@ -1,8 +1,8 @@
 package routing
 
 import (
-	"github.com/bradenrayhorn/switchboard-backend/repositories"
-	"github.com/bradenrayhorn/switchboard-backend/utils"
+	"github.com/bradenrayhorn/switchboard-core/repositories"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"log"

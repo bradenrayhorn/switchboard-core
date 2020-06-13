@@ -3,9 +3,9 @@ package routing
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bradenrayhorn/switchboard-backend/models"
-	"github.com/bradenrayhorn/switchboard-backend/repositories"
-	"github.com/bradenrayhorn/switchboard-backend/utils"
+	"github.com/bradenrayhorn/switchboard-core/models"
+	"github.com/bradenrayhorn/switchboard-core/repositories"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"

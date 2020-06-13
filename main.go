@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/bradenrayhorn/switchboard-backend/config"
-	"github.com/bradenrayhorn/switchboard-backend/database"
-	"github.com/bradenrayhorn/switchboard-backend/routing"
+	"github.com/bradenrayhorn/switchboard-core/config"
+	"github.com/bradenrayhorn/switchboard-core/database"
+	"github.com/bradenrayhorn/switchboard-core/routing"
 	"log"
 )
 

@@ -2,8 +2,8 @@ package routing
 
 import (
 	"errors"
-	"github.com/bradenrayhorn/switchboard-backend/models"
-	"github.com/bradenrayhorn/switchboard-backend/repositories"
+	"github.com/bradenrayhorn/switchboard-core/models"
+	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"

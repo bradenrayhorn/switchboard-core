@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/bradenrayhorn/switchboard-backend/repositories"
-	"github.com/bradenrayhorn/switchboard-backend/utils"
+	"github.com/bradenrayhorn/switchboard-core/repositories"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"net/http"

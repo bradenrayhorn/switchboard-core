@@ -1,4 +1,4 @@
-module github.com/bradenrayhorn/switchboard-backend
+module github.com/bradenrayhorn/switchboard-core
 
 go 1.14
 
