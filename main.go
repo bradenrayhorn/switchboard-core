@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/bradenrayhorn/switchboard-core/config"
 	"github.com/bradenrayhorn/switchboard-core/database"
+	"github.com/bradenrayhorn/switchboard-core/grpc"
 	"github.com/bradenrayhorn/switchboard-core/routing"
 	"log"
 )
@@ -18,10 +19,16 @@ func main() {
 	database.Setup()
 	log.Printf("database ready!")
 
-	startServer()
+	startServers()
 }
 
-func startServer() {
+func startServers() {
+	// start grpc
+	grpcServer := grpc.NewServer()
+	go grpcServer.Start()
+
+	// start http
+	log.Print("starting http server...")
 	r := routing.MakeRouter()
 
 	err := r.Run()
