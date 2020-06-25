@@ -17,7 +17,6 @@ func MakeTestRouter() *gin.Engine {
 	gin.DefaultWriter = ioutil.Discard
 	gin.DefaultErrorWriter = ioutil.Discard
 	router := gin.New()
-	router.Use(gin.Recovery())
 	applyRoutes(router)
 	return router
 }
@@ -36,6 +35,7 @@ func applyRoutes(router *gin.Engine) {
 
 	api.GET("/me", ShowMe)
 
-	api.POST("/groups/create", CreateGroup)
 	api.GET("/groups", GetGroups)
+	api.POST("/groups/create", CreateGroup)
+	api.POST("/groups/update", UpdateGroup)
 }

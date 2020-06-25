@@ -1,11 +1,11 @@
 package routing
 
 import (
-	"errors"
-	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
+	"github.com/bradenrayhorn/switchboard-core/repositories/mocks"
 	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -16,7 +16,11 @@ func TestRegister(t *testing.T) {
 	r := MakeTestRouter()
 	utils.SetupTestRsaKeys()
 
-	repositories.User = &repositories.MockUserRepository{}
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("Exists", "test").Return(false, nil)
+	userRepo.On("CreateUser", "test", mock.Anything).Return(utils.MakeTestUser("test", ""), nil)
+
+	repositories.User = userRepo
 
 	w := httptest.NewRecorder()
 	reader := strings.NewReader("username=test&password=password")
@@ -26,18 +30,15 @@ func TestRegister(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	user, err := repositories.User.GetUser("test")
-
-	assert.NotNil(t, user)
-	assert.Nil(t, err)
+	userRepo.AssertCalled(t, "CreateUser", "test", mock.Anything)
 }
 
 func TestCannotRegisterTwice(t *testing.T) {
 	r := MakeTestRouter()
 	utils.SetupTestRsaKeys()
-
-	repositories.User = &repositories.MockUserRepository{}
-	_, _ = repositories.User.CreateUser("test", "")
+	userRepo := new(mocks.UserRepository)
+	userRepo.On("Exists", "test").Return(true, nil)
+	repositories.User = userRepo
 
 	w := httptest.NewRecorder()
 	reader := strings.NewReader("username=test&password=password")
@@ -46,6 +47,8 @@ func TestCannotRegisterTwice(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+
+	userRepo.AssertNotCalled(t, "CreateUser", "test", mock.Anything)
 }
 
 func TestCannotRegisterWithNoData(t *testing.T) {
@@ -58,27 +61,4 @@ func TestCannotRegisterWithNoData(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
-}
-
-type MockUserFailRepository struct {
-	repositories.MockUserRepository
-}
-
-func (r MockUserFailRepository) CreateUser(username string, hashedPassword string) (*models.User, error) {
-	return nil, errors.New("failed to create user")
-}
-
-func TestRegisterIfRepositoryFails(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
-	repositories.User = &MockUserFailRepository{}
-
-	w := httptest.NewRecorder()
-	reader := strings.NewReader("username=test&password=password")
-	req, _ := http.NewRequest("POST", "/api/auth/register", reader)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	r.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }

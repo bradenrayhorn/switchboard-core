@@ -12,6 +12,9 @@ type GroupRepository interface {
 	CreateGroup(groupName *string, userIds []primitive.ObjectID) (*models.Group, error)
 	GetGroups(userId primitive.ObjectID) ([]models.Group, error)
 	GroupExists(userIds []primitive.ObjectID) (bool, error)
+	GetGroup(groupId primitive.ObjectID, userId primitive.ObjectID) (*models.Group, error)
+	UpdateGroup(group *models.Group) error
+	DeleteGroup(group *models.Group) error
 }
 
 var Group GroupRepository
@@ -55,70 +58,21 @@ func (m MongoGroupRepository) GroupExists(userIds []primitive.ObjectID) (bool, e
 	return cursor.Current != nil, cursor.Close(mgm.Ctx())
 }
 
-// mock repository
+func (m MongoGroupRepository) GetGroup(groupId primitive.ObjectID, userId primitive.ObjectID) (*models.Group, error) {
+	group := &models.Group{}
+	err := mgm.Coll(&models.Group{}).First(bson.M{"users": userId, "_id": groupId}, group)
 
-type MockGroupRepository struct {
-	groups []models.Group
+	if err != nil {
+		return nil, err
+	}
+
+	return group, err
 }
 
-func (m *MockGroupRepository) CreateGroup(groupName *string, userIds []primitive.ObjectID) (*models.Group, error) {
-	group := &models.Group{
-		DefaultModel: mgm.DefaultModel{
-			IDField:    mgm.IDField{ID: primitive.NewObjectID()},
-			DateFields: mgm.DateFields{},
-		},
-		Name:    groupName,
-		UserIds: userIds,
-	}
-
-	m.groups = append(m.groups, *group)
-
-	return group, nil
+func (m MongoGroupRepository) UpdateGroup(group *models.Group) error {
+	return mgm.Coll(group).Update(group)
 }
 
-func (m MockGroupRepository) GetGroups(userId primitive.ObjectID) ([]models.Group, error) {
-	var filteredGroups []models.Group
-	for _, group := range m.groups {
-		for _, groupUserId := range group.UserIds {
-			if groupUserId == userId {
-				filteredGroups = append(filteredGroups, group)
-				break
-			}
-		}
-	}
-
-	return filteredGroups, nil
-}
-
-func (m MockGroupRepository) GroupExists(userIds []primitive.ObjectID) (bool, error) {
-	for _, group := range m.groups {
-		if comparePrimitiveIdsArray(group.UserIds, userIds) {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
-func comparePrimitiveIdsArray(x, y []primitive.ObjectID) bool {
-	if len(x) != len(y) {
-		return false
-	}
-	diff := make(map[primitive.ObjectID]int, len(x))
-	for _, _x := range x {
-		diff[_x]++
-	}
-	for _, _y := range y {
-		if _, ok := diff[_y]; !ok {
-			return false
-		}
-		diff[_y] -= 1
-		if diff[_y] == 0 {
-			delete(diff, _y)
-		}
-	}
-	if len(diff) == 0 {
-		return true
-	}
-	return false
+func (m MongoGroupRepository) DeleteGroup(group *models.Group) error {
+	return mgm.Coll(group).Delete(group)
 }

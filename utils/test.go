@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"github.com/Kamva/mgm/v3"
 	"github.com/bradenrayhorn/switchboard-core/config"
+	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/dgrijalva/jwt-go"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 )
 
@@ -44,4 +47,24 @@ func SetupTestRsaKeys() {
 	}
 	config.RsaPrivate = privateKey
 	config.RsaPublic = publicKey
+}
+
+func MakeTestUser(username string, passwordHash string) *models.User {
+	return &models.User{
+		DefaultModel: mgm.DefaultModel{
+			IDField: mgm.IDField{ID: primitive.NewObjectID()},
+		},
+		Username: username,
+		Password: passwordHash,
+	}
+}
+
+func MakeTestGroup(name *string, users []primitive.ObjectID) models.Group {
+	return models.Group{
+		DefaultModel: mgm.DefaultModel{
+			IDField: mgm.IDField{ID: primitive.NewObjectID()},
+		},
+		Name:    name,
+		UserIds: users,
+	}
 }

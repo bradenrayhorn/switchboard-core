@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"errors"
 	"github.com/Kamva/mgm/v3"
+	"github.com/Kamva/mgm/v3/operator"
 	"github.com/bradenrayhorn/switchboard-core/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,6 +18,7 @@ type UserRepository interface {
 	CreateUser(username string, hashedPassword string) (*models.User, error)
 	GetUser(username string) (*models.User, error)
 	Exists(username string) (bool, error)
+	GetUsers(userIDs []primitive.ObjectID) ([]models.User, error)
 }
 
 type MongoUserRepository struct{}
@@ -50,42 +51,14 @@ func (r MongoUserRepository) Exists(username string) (bool, error) {
 	return cursor.Current != nil, cursor.Close(mgm.Ctx())
 }
 
-// mock repository
-
-type MockUserRepository struct {
-	users []models.User
-}
-
-func (r *MockUserRepository) CreateUser(username string, hashedPassword string) (*models.User, error) {
-	user := &models.User{
-		DefaultModel: mgm.DefaultModel{
-			IDField:    mgm.IDField{ID: primitive.NewObjectID()},
-			DateFields: mgm.DateFields{},
-		},
-		Username: username,
-		Password: hashedPassword,
+func (r MongoUserRepository) GetUsers(userIDs []primitive.ObjectID) ([]models.User, error) {
+	var users = make([]models.User, 0)
+	cursor, err := mgm.Coll(&models.User{}).Find(mgm.Ctx(), bson.M{"_id": bson.M{operator.In: userIDs}})
+	if err != nil {
+		return users, err
 	}
 
-	r.users = append(r.users, *user)
-	return user, nil
-}
+	err = cursor.All(mgm.Ctx(), &users)
 
-func (r MockUserRepository) GetUser(username string) (*models.User, error) {
-	for i := range r.users {
-		if r.users[i].Username == username {
-			return &r.users[i], nil
-		}
-	}
-
-	return nil, errors.New("no user found")
-}
-
-func (r MockUserRepository) Exists(username string) (bool, error) {
-	for i := range r.users {
-		if r.users[i].Username == username {
-			return true, nil
-		}
-	}
-
-	return false, nil
+	return users, nil
 }
