@@ -20,7 +20,7 @@ type CreateGroupRequest struct {
 }
 
 type UpdateGroupRequest struct {
-	Id            string
+	Id            string   `form:"id" json:"id"`
 	GroupName     string   `form:"name" json:"name"`
 	AddUserIds    []string `json:"add_users" form:"add_users"`
 	RemoveUserIds []string `json:"remove_users" form:"remove_users"`

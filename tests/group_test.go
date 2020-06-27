@@ -98,6 +98,31 @@ func TestGetGroups(t *testing.T) {
 	assert.Len(t, body.Data, 2)
 }
 
+func TestUpdateGroup(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	user3, err := repositories.User.CreateUser("test3", "")
+	assert.Nil(t, err)
+
+	group, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID})
+	assert.Nil(t, err)
+
+	w := httptest.NewRecorder()
+	form := url.Values{
+		"id":           []string{group.ID.Hex()},
+		"name":         []string{"new group name"},
+		"add_users":    []string{user3.ID.Hex()},
+		"remove_users": []string{user2.ID.Hex()},
+	}
+	req, _ := http.NewRequest("POST", "/api/groups/update", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+}
+
 func makeTestUsersAndToken(t *testing.T) (*models.User, *models.User, string) {
 	user1, err := repositories.User.CreateUser("test1", "")
 	assert.Nil(t, err)
