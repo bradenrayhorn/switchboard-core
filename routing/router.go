@@ -3,20 +3,11 @@ package routing
 import (
 	"github.com/bradenrayhorn/switchboard-core/middleware"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
 	"net/http"
 )
 
 func MakeRouter() *gin.Engine {
 	router := gin.Default()
-	applyRoutes(router)
-	return router
-}
-
-func MakeTestRouter() *gin.Engine {
-	gin.DefaultWriter = ioutil.Discard
-	gin.DefaultErrorWriter = ioutil.Discard
-	router := gin.New()
 	applyRoutes(router)
 	return router
 }

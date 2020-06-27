@@ -1,8 +1,9 @@
-package routing
+package tests
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -18,10 +19,8 @@ type GetMeResponse struct {
 }
 
 func TestShowMe(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
-	user := utils.MakeTestUser("test", "")
+	user, err := repositories.User.CreateUser("test", "")
+	assert.Nil(t, err)
 
 	token, _ := utils.CreateToken(user)
 
@@ -35,12 +34,10 @@ func TestShowMe(t *testing.T) {
 	var body GetMeResponse
 	_ = json.Unmarshal(w.Body.Bytes(), &body)
 	assert.Equal(t, user.ID.Hex(), body.Id)
+	assert.Nil(t, repositories.User.DropAll())
 }
 
 func TestCannotShowMeUnauthenticated(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/me", nil)
 	r.ServeHTTP(w, req)
@@ -49,10 +46,8 @@ func TestCannotShowMeUnauthenticated(t *testing.T) {
 }
 
 func TestCannotShowMeWithExpiredToken(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
-	user := utils.MakeTestUser("test", "")
+	user, err := repositories.User.CreateUser("test", "")
+	assert.Nil(t, err)
 
 	viper.Set("token_expiration", -10*time.Second)
 	token, _ := utils.CreateToken(user)
@@ -63,4 +58,5 @@ func TestCannotShowMeWithExpiredToken(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
 }

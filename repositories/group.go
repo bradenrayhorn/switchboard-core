@@ -15,6 +15,7 @@ type GroupRepository interface {
 	GetGroup(groupId primitive.ObjectID, userId primitive.ObjectID) (*models.Group, error)
 	UpdateGroup(group *models.Group) error
 	DeleteGroup(group *models.Group) error
+	DropAll() error
 }
 
 var Group GroupRepository
@@ -75,4 +76,8 @@ func (m MongoGroupRepository) UpdateGroup(group *models.Group) error {
 
 func (m MongoGroupRepository) DeleteGroup(group *models.Group) error {
 	return mgm.Coll(group).Delete(group)
+}
+
+func (m MongoGroupRepository) DropAll() error {
+	return mgm.Coll(&models.Group{}).Drop(mgm.Ctx())
 }

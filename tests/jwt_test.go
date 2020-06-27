@@ -1,8 +1,9 @@
-package utils
+package tests
 
 import (
 	"github.com/Kamva/mgm/v3"
 	"github.com/bradenrayhorn/switchboard-core/models"
+	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +12,6 @@ import (
 )
 
 func TestCreateToken(t *testing.T) {
-	SetupTestRsaKeys()
 	// create test user
 	user := models.User{
 		DefaultModel: mgm.DefaultModel{
@@ -23,14 +23,13 @@ func TestCreateToken(t *testing.T) {
 	}
 
 	// create token
-	token, err := CreateToken(&user)
+	token, err := utils.CreateToken(&user)
 
 	require.Nil(t, err, "creating token should succeed")
 	assert.True(t, len(token) > 0, "token has content")
 }
 
 func TestParseToken(t *testing.T) {
-	SetupTestRsaKeys()
 	// create test user
 	userId := primitive.NewObjectID()
 	user := models.User{
@@ -43,13 +42,13 @@ func TestParseToken(t *testing.T) {
 	}
 
 	// create token
-	tokenString, err := CreateToken(&user)
+	tokenString, err := utils.CreateToken(&user)
 
 	require.Nil(t, err, "creating token should succeed")
 	assert.True(t, len(tokenString) > 0, "token has content")
 
 	// parse token
-	token, err := ParseToken(tokenString)
+	token, err := utils.ParseToken(tokenString)
 
 	require.Nil(t, err, "parsing token should succeed")
 
@@ -68,7 +67,7 @@ func TestParseTokenFail(t *testing.T) {
 
 	require.Nil(t, err)
 
-	_, err = ParseToken(tokenString)
+	_, err = utils.ParseToken(tokenString)
 
 	assert.NotNil(t, err)
 }

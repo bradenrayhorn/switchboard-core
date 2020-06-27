@@ -30,13 +30,8 @@ func LoadConfig() {
 	_ = viper.BindEnv("mongo_username", "MONGO_USERNAME")
 	_ = viper.BindEnv("mongo_password", "MONGO_PASSWORD")
 	_ = viper.BindEnv("mongo_database", "MONGO_DATABASE")
-	_ = viper.BindEnv("jwt_secret", "JWT_SECRET")
 	_ = viper.BindEnv("rsa_path", "RSA_PATH")
 	_ = viper.BindEnv("grpc_port", "GRPC_PORT")
-
-	if len(viper.GetString("jwt_secret")) < 32 {
-		log.Println("Attention! JWT secret may be insecure.")
-	}
 
 	loadRsaKeys()
 }

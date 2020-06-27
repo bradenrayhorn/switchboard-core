@@ -19,6 +19,7 @@ type UserRepository interface {
 	GetUser(username string) (*models.User, error)
 	Exists(username string) (bool, error)
 	GetUsers(userIDs []primitive.ObjectID) ([]models.User, error)
+	DropAll() error
 }
 
 type MongoUserRepository struct{}
@@ -61,4 +62,8 @@ func (r MongoUserRepository) GetUsers(userIDs []primitive.ObjectID) ([]models.Us
 	err = cursor.All(mgm.Ctx(), &users)
 
 	return users, nil
+}
+
+func (r MongoUserRepository) DropAll() error {
+	return mgm.Coll(&models.User{}).Drop(mgm.Ctx())
 }

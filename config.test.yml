@@ -1,0 +1,7 @@
+mongo_host: db
+mongo_port: 27017
+mongo_username: switchboard
+mongo_password: password
+mongo_database: switchboard
+grpc_port: 9001
+rsa_path: ../test_rsa

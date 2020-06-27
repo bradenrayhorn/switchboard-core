@@ -1,14 +1,12 @@
-package routing
+package tests
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
-	"github.com/bradenrayhorn/switchboard-core/repositories/mocks"
 	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
@@ -19,18 +17,7 @@ import (
 )
 
 func TestCreateGroup(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
-	user1 := utils.MakeTestUser("test1", "")
-	user2 := utils.MakeTestUser("test2", "")
-	userIDSlice := []primitive.ObjectID{user1.ID, user2.ID}
-	token, _ := utils.CreateToken(user1)
-
-	groupRepo := new(mocks.GroupRepository)
-	groupRepo.On("GroupExists", userIDSlice).Return(false, nil)
-	groupRepo.On("CreateGroup", mock.AnythingOfType("*string"), userIDSlice).Return(nil, nil)
-	repositories.Group = groupRepo
+	user1, user2, token := makeTestUsersAndToken(t)
 
 	w := httptest.NewRecorder()
 	form := url.Values{"users": []string{user1.ID.Hex(), user2.ID.Hex()}}
@@ -40,21 +27,15 @@ func TestCreateGroup(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	groupRepo.AssertCalled(t, "CreateGroup", mock.AnythingOfType("*string"), userIDSlice)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
 }
 
 func TestCantCreateDuplicateGroup(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
+	user1, user2, token := makeTestUsersAndToken(t)
 
-	user1 := utils.MakeTestUser("test1", "")
-	user2 := utils.MakeTestUser("test2", "")
-	userIDSlice := []primitive.ObjectID{user2.ID, user1.ID}
-	token, _ := utils.CreateToken(user1)
-
-	groupRepo := new(mocks.GroupRepository)
-	groupRepo.On("GroupExists", userIDSlice).Return(true, nil)
-	repositories.Group = groupRepo
+	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID})
+	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
 	form := url.Values{"users": []string{user2.ID.Hex(), user1.ID.Hex()}}
@@ -64,19 +45,12 @@ func TestCantCreateDuplicateGroup(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
-	groupRepo.AssertNotCalled(t, "CreateGroup", mock.AnythingOfType("*string"), userIDSlice)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
 }
 
 func TestCantCreateGroupWithoutMe(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
-	user1 := utils.MakeTestUser("test1", "")
-	user2 := utils.MakeTestUser("test2", "")
-	token, _ := utils.CreateToken(user1)
-
-	groupRepo := new(mocks.GroupRepository)
-	repositories.Group = groupRepo
+	_, user2, token := makeTestUsersAndToken(t)
 
 	w := httptest.NewRecorder()
 	form := url.Values{"users": []string{user2.ID.Hex()}}
@@ -86,14 +60,11 @@ func TestCantCreateGroupWithoutMe(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
 }
 
 func TestCantCreateGroupWithoutUsers(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
-
-	user1 := utils.MakeTestUser("test1", "")
-	token, _ := utils.CreateToken(user1)
+	_, _, token := makeTestUsersAndToken(t)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/groups/create", nil)
@@ -102,27 +73,16 @@ func TestCantCreateGroupWithoutUsers(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
 }
 
 func TestGetGroups(t *testing.T) {
-	r := MakeTestRouter()
-	utils.SetupTestRsaKeys()
+	user1, user2, token := makeTestUsersAndToken(t)
 
-	user1 := utils.MakeTestUser("test1", "")
-	user2 := utils.MakeTestUser("test2", "")
-	token, _ := utils.CreateToken(user1)
-
-	// setup group repo
-	groupRepo := new(mocks.GroupRepository)
-	groupRepo.On("GetGroups", user1.ID).Return([]models.Group{
-		utils.MakeTestGroup(nil, []primitive.ObjectID{user1.ID}),
-		utils.MakeTestGroup(nil, []primitive.ObjectID{user1.ID, user2.ID}),
-	}, nil)
-	repositories.Group = groupRepo
-	// setup user repo
-	userRepo := new(mocks.UserRepository)
-	userRepo.On("GetUsers", mock.Anything).Return([]models.User{*user1, *user2}, nil)
-	repositories.User = userRepo
+	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID})
+	assert.Nil(t, err)
+	_, err = repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID})
+	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/groups", nil)
@@ -136,4 +96,13 @@ func TestGetGroups(t *testing.T) {
 	}
 	_ = json.Unmarshal(w.Body.Bytes(), &body)
 	assert.Len(t, body.Data, 2)
+}
+
+func makeTestUsersAndToken(t *testing.T) (*models.User, *models.User, string) {
+	user1, err := repositories.User.CreateUser("test1", "")
+	assert.Nil(t, err)
+	user2, err := repositories.User.CreateUser("test2", "")
+	assert.Nil(t, err)
+	token, _ := utils.CreateToken(user1)
+	return user1, user2, token
 }
