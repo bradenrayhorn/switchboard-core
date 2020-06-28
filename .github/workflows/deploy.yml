@@ -1,4 +1,4 @@
-name: Build and Upload to Registry
+name: Build, Upload, and Deploy
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
 jobs:
 
   build:
-    name: Build and Upload
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
 
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Build and Push
+      - name: Build and push to registry
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -22,3 +22,11 @@ jobs:
           registry: registry.gitlab.com
           repository: bradenr/switchboard-core
           tags: latest
+
+      - name: Rollout Kubernetes deployment
+        uses: steebchen/kubectl@master
+        env:
+          KUBECTL_CONFIG_DATA: ${{ secrets.KUBECTL_CONFIG }}
+          KUBECTL_VERSION: "1.18"
+        with:
+          args: rollout restart deployment/switchboard-core
