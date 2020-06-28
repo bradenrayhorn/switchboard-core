@@ -27,6 +27,6 @@ jobs:
         uses: steebchen/kubectl@master
         env:
           KUBECTL_CONFIG_DATA: ${{ secrets.KUBECTL_CONFIG }}
-          KUBECTL_VERSION: "1.18"
+          KUBECTL_VERSION: "1.16"
         with:
           args: rollout restart deployment/switchboard-core
