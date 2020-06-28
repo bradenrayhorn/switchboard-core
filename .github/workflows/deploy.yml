@@ -23,10 +23,11 @@ jobs:
           repository: bradenr/switchboard-core
           tags: latest
 
-      - name: Rollout Kubernetes deployment
-        uses: steebchen/kubectl@master
-        env:
-          KUBECTL_CONFIG_DATA: ${{ secrets.KUBECTL_CONFIG }}
-          KUBECTL_VERSION: "1.16"
+      - name: Set up kubectl
+        uses: matootie/dokube@v1.3.2
         with:
-          args: rollout restart deployment/switchboard-core
+          personalAccessToken: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+          clusterName: mykube
+
+      - name: Rollout Kubernetes deployment
+        run: kubectl rollout restart deployment/switchboard-core
