@@ -7,3 +7,4 @@ config.yml
 jwt_rsa
 jwt_rsa.pub
 reports
+switchboard-core

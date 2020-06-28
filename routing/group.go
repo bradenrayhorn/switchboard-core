@@ -64,10 +64,13 @@ func GetGroups(c *gin.Context) {
 		}
 	}
 
-	usersList, err := repositories.User.GetUsers(userIDs)
-	if err != nil {
-		utils.JsonError(http.StatusInternalServerError, "failed to get users", c)
-		return
+	var usersList []models.User
+	if len(userIDs) > 0 {
+		usersList, err = repositories.User.GetUsers(userIDs)
+		if err != nil {
+			utils.JsonError(http.StatusInternalServerError, "failed to get users", c)
+			return
+		}
 	}
 
 	var users = make(map[string]models.User)
