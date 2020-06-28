@@ -25,3 +25,9 @@ type UpdateGroupRequest struct {
 	AddUserIds    []string `json:"add_users" form:"add_users"`
 	RemoveUserIds []string `json:"remove_users" form:"remove_users"`
 }
+
+// users
+
+type UserSearchRequest struct {
+	Name string `form:"username" json:"username" binding:"required"`
+}

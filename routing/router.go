@@ -29,4 +29,6 @@ func applyRoutes(router *gin.Engine) {
 	api.GET("/groups", GetGroups)
 	api.POST("/groups/create", CreateGroup)
 	api.POST("/groups/update", UpdateGroup)
+
+	api.POST("/users/search", SearchUsers)
 }

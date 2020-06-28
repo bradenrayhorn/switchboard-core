@@ -59,4 +59,5 @@ func TestCannotShowMeWithExpiredToken(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 	assert.Nil(t, repositories.User.DropAll())
+	viper.Set("token_expiration", 24*time.Hour)
 }
