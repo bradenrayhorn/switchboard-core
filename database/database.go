@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"log"
 )
 
 func Setup() {
@@ -21,19 +22,25 @@ func Setup() {
 	))
 
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		log.Println("failed to connect to database")
+		return
 	}
 
 	_, client, _, err := mgm.DefaultConfigs()
 
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		log.Println("failed to connect to database")
+		return
 	}
 
 	err = client.Ping(mgm.Ctx(), readpref.Primary())
 
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		log.Println("failed to connect to database")
+		return
 	}
 
 }
