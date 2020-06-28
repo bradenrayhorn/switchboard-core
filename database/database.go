@@ -11,13 +11,6 @@ import (
 
 func Setup() {
 	database := viper.GetString("mongo_database")
-	fmt.Println("mongodb://%s:%s@%s:%s/%s",
-		viper.GetString("mongo_username"),
-		viper.GetString("mongo_password"),
-		viper.GetString("mongo_host"),
-		viper.GetString("mongo_port"),
-		database,
-	)
 	err := mgm.SetDefaultConfig(nil, database, options.Client().ApplyURI(
 		fmt.Sprintf("mongodb://%s:%s@%s:%s/%s",
 			viper.GetString("mongo_username"),
