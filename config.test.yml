@@ -3,5 +3,6 @@ mongo_port: 27017
 mongo_username: switchboard
 mongo_password: password
 mongo_database: switchboard
+redis_address: redis:6379
 grpc_port: 9001
 rsa_path: ../test_rsa

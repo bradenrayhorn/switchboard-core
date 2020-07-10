@@ -1,13 +1,15 @@
 package routing
 
 import (
+	"github.com/bradenrayhorn/switchboard-core/database"
 	"github.com/bradenrayhorn/switchboard-core/middleware"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func MakeRouter() *gin.Engine {
+func MakeRouter(redis *database.RedisDB) *gin.Engine {
 	router := gin.Default()
+	router.Use(middleware.RedisMiddleware(redis))
 	applyRoutes(router)
 	return router
 }

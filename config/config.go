@@ -25,11 +25,18 @@ func LoadConfig() {
 	viper.SetDefault("token_expiration", time.Hour*24)
 	viper.SetDefault("rsa_path", "jwt_rsa")
 
+	// mongo
 	_ = viper.BindEnv("mongo_host", "MONGO_HOST")
 	_ = viper.BindEnv("mongo_port", "MONGO_PORT")
 	_ = viper.BindEnv("mongo_username", "MONGO_USERNAME")
 	_ = viper.BindEnv("mongo_password", "MONGO_PASSWORD")
 	_ = viper.BindEnv("mongo_database", "MONGO_DATABASE")
+	// redis
+	_ = viper.BindEnv("redis_address", "REDIS_ADDRESS")
+	_ = viper.BindEnv("redis_username", "REDIS_USERNAME")
+	_ = viper.BindEnv("redis_password", "REDIS_PASSWORD")
+	_ = viper.BindEnv("redis_db", "REDIS_DB")
+	// other
 	_ = viper.BindEnv("rsa_path", "RSA_PATH")
 	_ = viper.BindEnv("grpc_port", "GRPC_PORT")
 

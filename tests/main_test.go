@@ -20,8 +20,9 @@ func testMain(m *testing.M) int {
 	viper.AddConfigPath("../")
 	config.LoadConfig()
 	database.Setup()
+	redisDB := database.MakeRedisClient()
 
-	r = routing.MakeRouter()
+	r = routing.MakeRouter(redisDB)
 
 	return m.Run()
 }

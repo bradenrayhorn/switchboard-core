@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/bradenrayhorn/switchboard-core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -8,13 +9,13 @@ import (
 	"net/http"
 )
 
-func CreateGroup(name string, userIds []string, authUserId string) *utils.HttpError {
+func CreateGroup(name string, userIds []string, authUserId string) (*models.Group, *utils.HttpError) {
 	var primitiveUserIds []primitive.ObjectID
 	var includesAuth = false
 	for _, userId := range userIds {
 		primitiveUserId, err := primitive.ObjectIDFromHex(userId)
 		if err != nil {
-			return utils.MakeHttpError(http.StatusUnprocessableEntity, "invalid user id provided")
+			return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "invalid user id provided")
 		}
 		if userId == authUserId {
 			includesAuth = true
@@ -23,17 +24,17 @@ func CreateGroup(name string, userIds []string, authUserId string) *utils.HttpEr
 	}
 
 	if !includesAuth {
-		return utils.MakeHttpError(http.StatusUnprocessableEntity, "you must be a member of the group")
+		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "you must be a member of the group")
 	}
 
 	exists, err := repositories.Group.GroupExists(primitiveUserIds)
 	if err != nil {
 		log.Println(err)
-		return utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
+		return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
 	}
 
 	if exists {
-		return utils.MakeHttpError(http.StatusUnprocessableEntity, "group already exists")
+		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "group already exists")
 	}
 
 	var groupName *string = nil
@@ -41,14 +42,14 @@ func CreateGroup(name string, userIds []string, authUserId string) *utils.HttpEr
 		groupName = &name
 	}
 
-	_, err = repositories.Group.CreateGroup(groupName, primitiveUserIds)
+	group, err := repositories.Group.CreateGroup(groupName, primitiveUserIds)
 
 	if err != nil {
 		log.Println(err)
-		return utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
+		return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
 	}
 
-	return nil
+	return group, nil
 }
 
 func UpdateGroup(id string, authUserId string, groupName string, usersToAdd []string, usersToRemove []string) *utils.HttpError {

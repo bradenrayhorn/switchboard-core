@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"github.com/bradenrayhorn/switchboard-core/database"
 	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/bradenrayhorn/switchboard-core/services"
@@ -18,10 +19,15 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	err := services.CreateGroup(request.GroupName, request.UserIds, c.GetString("user_id"))
+	group, err := services.CreateGroup(request.GroupName, request.UserIds, c.GetString("user_id"))
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
+	}
+
+	redis := c.MustGet("redis").(*database.RedisDB)
+	for _, userID := range request.UserIds {
+		redis.PublishGroupJoin(userID, group.ID.Hex())
 	}
 }
 
@@ -36,6 +42,14 @@ func UpdateGroup(c *gin.Context) {
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
+	}
+
+	redis := c.MustGet("redis").(*database.RedisDB)
+	for _, userID := range request.AddUserIds {
+		redis.PublishGroupJoin(userID, request.Id)
+	}
+	for _, userID := range request.RemoveUserIds {
+		redis.PublishGroupLeft(userID, request.Id)
 	}
 }
 

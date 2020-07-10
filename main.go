@@ -17,19 +17,20 @@ func main() {
 
 	log.Printf("initializing database...")
 	database.Setup()
+	redisDB := database.MakeRedisClient()
 	log.Printf("database ready!")
 
-	startServers()
+	startServers(redisDB)
 }
 
-func startServers() {
-	// start grpc
+func startServers(redis *database.RedisDB) {
+	// start gRPC
 	grpcServer := grpc.NewServer()
 	go grpcServer.Start()
 
 	// start http
 	log.Print("starting http server...")
-	r := routing.MakeRouter()
+	r := routing.MakeRouter(redis)
 
 	err := r.Run()
 

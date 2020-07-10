@@ -28,3 +28,11 @@ services:
     restart: on-failure
     networks:
       - test-network
+
+  redis:
+    image: redis:alpine3.12
+    ports:
+      - "6379:6379"
+    restart: on-failure
+    networks:
+      - test-network
