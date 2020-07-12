@@ -18,6 +18,7 @@ func CreateOrganization(c *gin.Context) {
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
+		return
 	}
 }
 
@@ -32,5 +33,15 @@ func GetOrganizations(c *gin.Context) {
 }
 
 func AddUserToOrganization(c *gin.Context) {
+	var request AddUserToOrganizationRequest
+	if err := c.ShouldBind(&request); err != nil {
+		utils.JsonError(http.StatusUnprocessableEntity, err.Error(), c)
+		return
+	}
 
+	err := services.AddUserToOrganization(request.OrganizationID, request.Username, c.GetString("user_id"))
+	if err != nil {
+		utils.JsonError(err.Code, err.Error.Error(), c)
+		return
+	}
 }

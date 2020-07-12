@@ -10,6 +10,8 @@ import (
 type OrganizationRepository interface {
 	Create(name string, users []models.OrganizationUser) (*models.Organization, error)
 	GetForUser(userID primitive.ObjectID) ([]models.Organization, error)
+	GetForUserAndID(organizationID primitive.ObjectID, userID primitive.ObjectID) (*models.Organization, error)
+	UpdateOrganization(organization *models.Organization) error
 	DropAll() error
 }
 
@@ -41,6 +43,21 @@ func (m MongoOrganizationRepository) GetForUser(userID primitive.ObjectID) ([]mo
 	err = cursor.All(mgm.Ctx(), &organizations)
 
 	return organizations, nil
+}
+
+func (m MongoOrganizationRepository) GetForUserAndID(organizationID primitive.ObjectID, userID primitive.ObjectID) (*models.Organization, error) {
+	organization := &models.Organization{}
+	err := mgm.Coll(&models.Organization{}).First(bson.M{"users.id": userID, "_id": organizationID}, organization)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return organization, err
+}
+
+func (m MongoOrganizationRepository) UpdateOrganization(organization *models.Organization) error {
+	return mgm.Coll(organization).Update(organization)
 }
 
 func (m MongoOrganizationRepository) DropAll() error {

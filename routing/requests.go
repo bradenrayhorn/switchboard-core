@@ -37,3 +37,8 @@ type UserSearchRequest struct {
 type CreateOrganizationRequest struct {
 	Name string `form:"name" json:"name" binding:"required"`
 }
+
+type AddUserToOrganizationRequest struct {
+	OrganizationID string `form:"organization_id" json:"organization_id" binding:"required"`
+	Username       string `form:"username" json:"username" binding:"required"`
+}

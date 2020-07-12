@@ -61,6 +61,100 @@ func TestGetOrganizations(t *testing.T) {
 	assert.Nil(t, repositories.Organization.DropAll())
 }
 
+func TestAddUserToOrganization(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, user1)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"username": []string{user2.Username}, "organization_id": []string{organization.ID.Hex()}}
+	req, _ := http.NewRequest("POST", "/api/organizations/invite-user", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	foundOrg, err := repositories.Organization.GetForUserAndID(organization.ID, user2.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, foundOrg)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCannotAddUserToOrganizationWithEmptyParams(t *testing.T) {
+	_, _, token := makeTestUsersAndToken(t)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/organizations/invite-user", nil)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+}
+
+func TestCannotAddUserToInvalidOrganization(t *testing.T) {
+	_, _, token := makeTestUsersAndToken(t)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"username": []string{"test_user"}, "organization_id": []string{"invalid id"}}
+	req, _ := http.NewRequest("POST", "/api/organizations/invite-user", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+}
+
+func TestCannotAddUserToOtherOrganization(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, user2)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"username": []string{user1.Username}, "organization_id": []string{organization.ID.Hex()}}
+	req, _ := http.NewRequest("POST", "/api/organizations/invite-user", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCannotAddUnknownUserToOrganization(t *testing.T) {
+	user1, _, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, user1)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"username": []string{"weird username"}, "organization_id": []string{organization.ID.Hex()}}
+	req, _ := http.NewRequest("POST", "/api/organizations/invite-user", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCannotAddUserToOrganizationTwice(t *testing.T) {
+	user1, _, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, user1)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"username": []string{user1.ID.Hex()}, "organization_id": []string{organization.ID.Hex()}}
+	req, _ := http.NewRequest("POST", "/api/organizations/invite-user", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
 func makeTestOrganizations(t *testing.T, user *models.User) *models.Organization {
 	users := []models.OrganizationUser{{
 		ID:   user.ID,
