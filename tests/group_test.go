@@ -18,9 +18,10 @@ import (
 
 func TestCreateGroup(t *testing.T) {
 	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
 
 	w := httptest.NewRecorder()
-	form := url.Values{"users": []string{user1.ID.Hex(), user2.ID.Hex()}}
+	form := url.Values{"users": []string{user1.ID.Hex(), user2.ID.Hex()}, "organization_id": []string{organization.ID.Hex()}}
 	req, _ := http.NewRequest("POST", "/api/groups/create", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -29,16 +30,18 @@ func TestCreateGroup(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Nil(t, repositories.User.DropAll())
 	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
 }
 
 func TestCantCreateDuplicateGroup(t *testing.T) {
 	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
 
-	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID})
+	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID}, organization.ID)
 	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
-	form := url.Values{"users": []string{user2.ID.Hex(), user1.ID.Hex()}}
+	form := url.Values{"users": []string{user1.ID.Hex(), user2.ID.Hex()}, "organization_id": []string{organization.ID.Hex()}}
 	req, _ := http.NewRequest("POST", "/api/groups/create", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -47,6 +50,28 @@ func TestCantCreateDuplicateGroup(t *testing.T) {
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
 	assert.Nil(t, repositories.User.DropAll())
 	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCanDuplicateGroupOutsideOrganization(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization1 := makeTestOrganizations(t, []*models.User{user1, user2})
+	organization2 := makeTestOrganizations(t, []*models.User{user1, user2})
+
+	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID}, organization1.ID)
+	assert.Nil(t, err)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"users": []string{user1.ID.Hex(), user2.ID.Hex()}, "organization_id": []string{organization2.ID.Hex()}}
+	req, _ := http.NewRequest("POST", "/api/groups/create", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
 }
 
 func TestCantCreateGroupWithoutMe(t *testing.T) {
@@ -76,12 +101,27 @@ func TestCantCreateGroupWithoutUsers(t *testing.T) {
 	assert.Nil(t, repositories.User.DropAll())
 }
 
+func TestCantCreateGroupWithoutOrganization(t *testing.T) {
+	_, user2, token := makeTestUsersAndToken(t)
+
+	w := httptest.NewRecorder()
+	form := url.Values{"users": []string{user2.ID.Hex()}}
+	req, _ := http.NewRequest("POST", "/api/groups/create", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+}
+
 func TestGetGroups(t *testing.T) {
 	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
 
-	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID})
+	_, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID}, organization.ID)
 	assert.Nil(t, err)
-	_, err = repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID})
+	_, err = repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID}, organization.ID)
 	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()
@@ -101,9 +141,10 @@ func TestGetGroups(t *testing.T) {
 func TestUpdateGroup(t *testing.T) {
 	user1, user2, token := makeTestUsersAndToken(t)
 	user3, err := repositories.User.CreateUser("test3", "")
+	organization := makeTestOrganizations(t, []*models.User{user1, user2, user3})
 	assert.Nil(t, err)
 
-	group, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID})
+	group, err := repositories.Group.CreateGroup(nil, []primitive.ObjectID{user1.ID, user2.ID}, organization.ID)
 	assert.Nil(t, err)
 
 	w := httptest.NewRecorder()

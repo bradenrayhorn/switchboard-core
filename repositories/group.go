@@ -9,9 +9,9 @@ import (
 )
 
 type GroupRepository interface {
-	CreateGroup(groupName *string, userIds []primitive.ObjectID) (*models.Group, error)
+	CreateGroup(groupName *string, userIds []primitive.ObjectID, organizationID primitive.ObjectID) (*models.Group, error)
 	GetGroups(userId primitive.ObjectID) ([]models.Group, error)
-	GroupExists(userIds []primitive.ObjectID) (bool, error)
+	GroupExists(userIds []primitive.ObjectID, organizationID primitive.ObjectID) (bool, error)
 	GetGroup(groupId primitive.ObjectID, userId primitive.ObjectID) (*models.Group, error)
 	UpdateGroup(group *models.Group) error
 	DeleteGroup(group *models.Group) error
@@ -26,10 +26,11 @@ func init() {
 
 type MongoGroupRepository struct{}
 
-func (m MongoGroupRepository) CreateGroup(groupName *string, userIds []primitive.ObjectID) (*models.Group, error) {
+func (m MongoGroupRepository) CreateGroup(groupName *string, userIds []primitive.ObjectID, organizationID primitive.ObjectID) (*models.Group, error) {
 	group := &models.Group{
-		Name:    groupName,
-		UserIds: userIds,
+		Name:         groupName,
+		UserIds:      userIds,
+		Organization: organizationID,
 	}
 
 	err := mgm.Coll(group).Create(group)
@@ -48,8 +49,11 @@ func (m MongoGroupRepository) GetGroups(userId primitive.ObjectID) ([]models.Gro
 	return groups, nil
 }
 
-func (m MongoGroupRepository) GroupExists(userIds []primitive.ObjectID) (bool, error) {
-	cursor, err := mgm.Coll(&models.Group{}).Find(mgm.Ctx(), bson.M{"users": bson.M{operator.All: userIds, operator.Size: len(userIds)}})
+func (m MongoGroupRepository) GroupExists(userIds []primitive.ObjectID, organizationID primitive.ObjectID) (bool, error) {
+	cursor, err := mgm.Coll(&models.Group{}).Find(mgm.Ctx(), bson.M{
+		"users":        bson.M{operator.All: userIds, operator.Size: len(userIds)},
+		"organization": organizationID,
+	})
 
 	if err != nil {
 		return false, err

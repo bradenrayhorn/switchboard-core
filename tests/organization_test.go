@@ -43,7 +43,7 @@ func TestCannotCreateOrganizationWithoutName(t *testing.T) {
 
 func TestGetOrganizations(t *testing.T) {
 	user1, _, token := makeTestUsersAndToken(t)
-	_ = makeTestOrganizations(t, user1)
+	_ = makeTestOrganizations(t, []*models.User{user1})
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/organizations", nil)
@@ -63,7 +63,7 @@ func TestGetOrganizations(t *testing.T) {
 
 func TestAddUserToOrganization(t *testing.T) {
 	user1, user2, token := makeTestUsersAndToken(t)
-	organization := makeTestOrganizations(t, user1)
+	organization := makeTestOrganizations(t, []*models.User{user1})
 
 	w := httptest.NewRecorder()
 	form := url.Values{"username": []string{user2.Username}, "organization_id": []string{organization.ID.Hex()}}
@@ -109,7 +109,7 @@ func TestCannotAddUserToInvalidOrganization(t *testing.T) {
 
 func TestCannotAddUserToOtherOrganization(t *testing.T) {
 	user1, user2, token := makeTestUsersAndToken(t)
-	organization := makeTestOrganizations(t, user2)
+	organization := makeTestOrganizations(t, []*models.User{user2})
 
 	w := httptest.NewRecorder()
 	form := url.Values{"username": []string{user1.Username}, "organization_id": []string{organization.ID.Hex()}}
@@ -125,7 +125,7 @@ func TestCannotAddUserToOtherOrganization(t *testing.T) {
 
 func TestCannotAddUnknownUserToOrganization(t *testing.T) {
 	user1, _, token := makeTestUsersAndToken(t)
-	organization := makeTestOrganizations(t, user1)
+	organization := makeTestOrganizations(t, []*models.User{user1})
 
 	w := httptest.NewRecorder()
 	form := url.Values{"username": []string{"weird username"}, "organization_id": []string{organization.ID.Hex()}}
@@ -141,7 +141,7 @@ func TestCannotAddUnknownUserToOrganization(t *testing.T) {
 
 func TestCannotAddUserToOrganizationTwice(t *testing.T) {
 	user1, _, token := makeTestUsersAndToken(t)
-	organization := makeTestOrganizations(t, user1)
+	organization := makeTestOrganizations(t, []*models.User{user1})
 
 	w := httptest.NewRecorder()
 	form := url.Values{"username": []string{user1.ID.Hex()}, "organization_id": []string{organization.ID.Hex()}}
@@ -155,12 +155,15 @@ func TestCannotAddUserToOrganizationTwice(t *testing.T) {
 	assert.Nil(t, repositories.Organization.DropAll())
 }
 
-func makeTestOrganizations(t *testing.T, user *models.User) *models.Organization {
-	users := []models.OrganizationUser{{
-		ID:   user.ID,
-		Role: models.RoleAdmin,
-	}}
-	organization, err := repositories.Organization.Create("Test Organization", users)
+func makeTestOrganizations(t *testing.T, users []*models.User) *models.Organization {
+	orgUsers := make([]models.OrganizationUser, 0)
+	for _, user := range users {
+		orgUsers = append(orgUsers, models.OrganizationUser{
+			ID:   user.ID,
+			Role: models.RoleAdmin,
+		})
+	}
+	organization, err := repositories.Organization.Create("Test Organization", orgUsers)
 	assert.Nil(t, err)
 	return organization
 }
