@@ -23,6 +23,7 @@ func CreateGroup(c *gin.Context) {
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
+		return
 	}
 
 	redis := c.MustGet("redis").(*database.RedisDB)
@@ -42,6 +43,7 @@ func UpdateGroup(c *gin.Context) {
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
+		return
 	}
 
 	redis := c.MustGet("redis").(*database.RedisDB)
