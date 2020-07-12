@@ -3,10 +3,13 @@ package repositories
 import (
 	"github.com/Kamva/mgm/v3"
 	"github.com/bradenrayhorn/switchboard-core/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type OrganizationRepository interface {
 	Create(name string, users []models.OrganizationUser) (*models.Organization, error)
+	GetForUser(userID primitive.ObjectID) ([]models.Organization, error)
 	DropAll() error
 }
 
@@ -26,6 +29,18 @@ func (m MongoOrganizationRepository) Create(name string, users []models.Organiza
 
 	err := mgm.Coll(organization).Create(organization)
 	return organization, err
+}
+
+func (m MongoOrganizationRepository) GetForUser(userID primitive.ObjectID) ([]models.Organization, error) {
+	var organizations = make([]models.Organization, 0)
+	cursor, err := mgm.Coll(&models.Organization{}).Find(mgm.Ctx(), bson.M{"users.id": userID})
+	if err != nil {
+		return organizations, err
+	}
+
+	err = cursor.All(mgm.Ctx(), &organizations)
+
+	return organizations, nil
 }
 
 func (m MongoOrganizationRepository) DropAll() error {

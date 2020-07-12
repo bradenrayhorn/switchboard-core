@@ -29,3 +29,19 @@ func CreateOrganization(name string, userID string) (*models.Organization, *util
 
 	return organization, nil
 }
+
+func GetOrganizations(userID string) ([]models.Organization, *utils.HttpError) {
+	var organizations = make([]models.Organization, 0)
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return organizations, utils.MakeHttpError(http.StatusUnprocessableEntity, "invalid user id")
+	}
+
+	organizations, err = repositories.Organization.GetForUser(userObjectID)
+	if err != nil {
+		log.Println(err)
+		return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to get organizations")
+	}
+
+	return organizations, nil
+}

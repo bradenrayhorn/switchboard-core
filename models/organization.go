@@ -19,6 +19,6 @@ type Organization struct {
 }
 
 type OrganizationUser struct {
-	ID   primitive.ObjectID
-	Role UserRole
+	ID   primitive.ObjectID `json:"id"`
+	Role UserRole           `json:"role"`
 }

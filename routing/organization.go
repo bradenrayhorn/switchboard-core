@@ -22,7 +22,13 @@ func CreateOrganization(c *gin.Context) {
 }
 
 func GetOrganizations(c *gin.Context) {
+	organizations, err := services.GetOrganizations(c.GetString("user_id"))
 
+	if err != nil {
+		utils.JsonError(err.Code, err.Error.Error(), c)
+	} else {
+		c.JSON(http.StatusOK, utils.Json{"data": organizations})
+	}
 }
 
 func AddUserToOrganization(c *gin.Context) {
