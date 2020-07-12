@@ -15,7 +15,7 @@ type RegisterRequest struct {
 // group
 
 type CreateGroupRequest struct {
-	GroupName string   `form:"name"`
+	GroupName string   `form:"name" json:"name"`
 	UserIds   []string `json:"users" form:"users" binding:"required"`
 }
 
@@ -30,4 +30,10 @@ type UpdateGroupRequest struct {
 
 type UserSearchRequest struct {
 	Name string `form:"username" json:"username" binding:"required"`
+}
+
+// organizations
+
+type CreateOrganizationRequest struct {
+	Name string `form:"name" json:"name" binding:"required"`
 }
