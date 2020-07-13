@@ -19,7 +19,6 @@ type UserRepository interface {
 	GetUser(username string) (*models.User, error)
 	Exists(username string) (bool, error)
 	GetUsers(userIDs []primitive.ObjectID) ([]models.User, error)
-	SearchUser(username string) ([]models.User, error)
 	DropAll() error
 }
 
@@ -56,18 +55,6 @@ func (r MongoUserRepository) Exists(username string) (bool, error) {
 func (r MongoUserRepository) GetUsers(userIDs []primitive.ObjectID) ([]models.User, error) {
 	var users = make([]models.User, 0)
 	cursor, err := mgm.Coll(&models.User{}).Find(mgm.Ctx(), bson.M{"_id": bson.M{operator.In: userIDs}})
-	if err != nil {
-		return users, err
-	}
-
-	err = cursor.All(mgm.Ctx(), &users)
-
-	return users, nil
-}
-
-func (r MongoUserRepository) SearchUser(username string) ([]models.User, error) {
-	var users = make([]models.User, 0)
-	cursor, err := mgm.Coll(&models.User{}).Find(mgm.Ctx(), bson.M{"username": bson.M{operator.Regex: username}})
 	if err != nil {
 		return users, err
 	}

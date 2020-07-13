@@ -14,7 +14,7 @@ func CreateOrganization(c *gin.Context) {
 		return
 	}
 
-	_, err := services.CreateOrganization(request.Name, c.GetString("user_id"))
+	_, err := services.CreateOrganization(request.Name, c.GetString("user_id"), c.GetString("user_username"))
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)

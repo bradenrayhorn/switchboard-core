@@ -159,8 +159,9 @@ func makeTestOrganizations(t *testing.T, users []*models.User) *models.Organizat
 	orgUsers := make([]models.OrganizationUser, 0)
 	for _, user := range users {
 		orgUsers = append(orgUsers, models.OrganizationUser{
-			ID:   user.ID,
-			Role: models.RoleAdmin,
+			ID:       user.ID,
+			Role:     models.RoleAdmin,
+			Username: user.Username,
 		})
 	}
 	organization, err := repositories.Organization.Create("Test Organization", orgUsers)

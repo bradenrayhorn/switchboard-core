@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/Kamva/mgm/v3"
+	"github.com/Kamva/mgm/v3/operator"
 	"github.com/bradenrayhorn/switchboard-core/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,6 +13,7 @@ type OrganizationRepository interface {
 	GetForUser(userID primitive.ObjectID) ([]models.Organization, error)
 	GetForUserAndID(organizationID primitive.ObjectID, userID primitive.ObjectID) (*models.Organization, error)
 	UpdateOrganization(organization *models.Organization) error
+	FindUser(organizationID primitive.ObjectID, username string) ([]models.OrganizationUser, error)
 	DropAll() error
 }
 
@@ -58,6 +60,17 @@ func (m MongoOrganizationRepository) GetForUserAndID(organizationID primitive.Ob
 
 func (m MongoOrganizationRepository) UpdateOrganization(organization *models.Organization) error {
 	return mgm.Coll(organization).Update(organization)
+}
+
+func (m MongoOrganizationRepository) FindUser(organizationID primitive.ObjectID, username string) ([]models.OrganizationUser, error) {
+	users := make([]models.OrganizationUser, 0)
+	err := mgm.Coll(&models.Organization{}).SimpleAggregate(&users,
+		bson.M{operator.Match: bson.M{"_id": organizationID}},
+		bson.M{operator.Unwind: "$users"},
+		bson.M{operator.Match: bson.M{"users.username": bson.M{operator.Regex: username}}},
+		bson.M{operator.Project: bson.M{"id": "$users.id", "username": "$users.username"}},
+	)
+	return users, err
 }
 
 func (m MongoOrganizationRepository) DropAll() error {

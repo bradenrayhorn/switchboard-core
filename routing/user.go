@@ -5,6 +5,7 @@ import (
 	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 )
 
@@ -15,7 +16,13 @@ func SearchUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := repositories.User.SearchUser(request.Name)
+	organizationID, err := primitive.ObjectIDFromHex(request.OrganizationID)
+	if err != nil {
+		utils.JsonError(http.StatusUnprocessableEntity, "invalid organization id", c)
+		return
+	}
+
+	users, err := repositories.Organization.FindUser(organizationID, request.Name)
 
 	if err != nil {
 		utils.JsonError(http.StatusInternalServerError, "failed to search", c)

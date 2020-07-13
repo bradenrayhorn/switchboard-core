@@ -9,15 +9,16 @@ import (
 	"net/http"
 )
 
-func CreateOrganization(name string, userID string) (*models.Organization, *utils.HttpError) {
+func CreateOrganization(name string, userID string, username string) (*models.Organization, *utils.HttpError) {
 	userObjectID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "invalid user id")
 	}
 
 	users := []models.OrganizationUser{{
-		ID:   userObjectID,
-		Role: models.RoleAdmin,
+		ID:       userObjectID,
+		Username: username,
+		Role:     models.RoleAdmin,
 	}}
 
 	organization, err := repositories.Organization.Create(name, users)
@@ -75,8 +76,9 @@ func AddUserToOrganization(organizationID string, username string, authUserID st
 
 	// add user to organization
 	userRole := models.OrganizationUser{
-		ID:   user.ID,
-		Role: models.RoleUser,
+		ID:       user.ID,
+		Username: user.Username,
+		Role:     models.RoleUser,
 	}
 	organization.Users = append(organization.Users, userRole)
 	err = repositories.Organization.UpdateOrganization(organization)

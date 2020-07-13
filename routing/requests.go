@@ -30,7 +30,8 @@ type UpdateGroupRequest struct {
 // users
 
 type UserSearchRequest struct {
-	Name string `form:"username" json:"username" binding:"required"`
+	Name           string `form:"username" json:"username" binding:"required"`
+	OrganizationID string `form:"organization_id" json:"organization_id" binding:"required"`
 }
 
 // organizations
