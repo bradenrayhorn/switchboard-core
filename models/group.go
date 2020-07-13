@@ -9,6 +9,7 @@ type Group struct {
 	mgm.DefaultModel `bson:",inline"`
 	Name             *string              `json:"name"`
 	UserIds          []primitive.ObjectID `json:"users" bson:"users"`
+	Organization     primitive.ObjectID   `json:"organization" bson:"organization"`
 }
 
 type GroupUser struct {
@@ -17,7 +18,8 @@ type GroupUser struct {
 }
 
 type GroupResponse struct {
-	ID    primitive.ObjectID `json:"id"`
-	Name  *string            `json:"name"`
-	Users []GroupUser        `json:"users"`
+	ID           primitive.ObjectID `json:"id"`
+	Name         *string            `json:"name"`
+	Users        []GroupUser        `json:"users"`
+	Organization primitive.ObjectID `json:"organization"`
 }

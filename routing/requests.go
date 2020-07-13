@@ -15,8 +15,9 @@ type RegisterRequest struct {
 // group
 
 type CreateGroupRequest struct {
-	GroupName string   `form:"name"`
-	UserIds   []string `json:"users" form:"users" binding:"required"`
+	GroupName      string   `form:"name" json:"name"`
+	UserIds        []string `json:"users" form:"users" binding:"required"`
+	OrganizationID string   `form:"organization_id" json:"organization_id" binding:"required"`
 }
 
 type UpdateGroupRequest struct {
@@ -29,5 +30,17 @@ type UpdateGroupRequest struct {
 // users
 
 type UserSearchRequest struct {
-	Name string `form:"username" json:"username" binding:"required"`
+	Name           string `form:"username" json:"username" binding:"required"`
+	OrganizationID string `form:"organization_id" json:"organization_id" binding:"required"`
+}
+
+// organizations
+
+type CreateOrganizationRequest struct {
+	Name string `form:"name" json:"name" binding:"required"`
+}
+
+type AddUserToOrganizationRequest struct {
+	OrganizationID string `form:"organization_id" json:"organization_id" binding:"required"`
+	Username       string `form:"username" json:"username" binding:"required"`
 }

@@ -9,25 +9,41 @@ import (
 	"net/http"
 )
 
-func CreateGroup(name string, userIds []string, authUserId string) (*models.Group, *utils.HttpError) {
+func CreateGroup(name string, userIds []string, authUserId string, organizationID string) (*models.Group, *utils.HttpError) {
+	organizationObjectID, orgErr := primitive.ObjectIDFromHex(organizationID)
+	authObjectID, userErr := primitive.ObjectIDFromHex(authUserId)
+	if orgErr != nil || userErr != nil {
+		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "invalid ids provided")
+	}
+
+	organization, err := repositories.Organization.GetForUserAndID(organizationObjectID, authObjectID)
+	if organization == nil || err != nil {
+		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "you do not have permission to access this organization")
+	}
+
+	userMap := make(map[string]primitive.ObjectID, 0)
+	for _, u := range organization.Users {
+		userMap[u.ID.Hex()] = u.ID
+	}
+
 	var primitiveUserIds []primitive.ObjectID
 	var includesAuth = false
-	for _, userId := range userIds {
-		primitiveUserId, err := primitive.ObjectIDFromHex(userId)
-		if err != nil {
+	for _, userID := range userIds {
+		if objectID, ok := userMap[userID]; ok {
+			if userID == authUserId {
+				includesAuth = true
+			}
+			primitiveUserIds = append(primitiveUserIds, objectID)
+		} else {
 			return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "invalid user id provided")
 		}
-		if userId == authUserId {
-			includesAuth = true
-		}
-		primitiveUserIds = append(primitiveUserIds, primitiveUserId)
 	}
 
 	if !includesAuth {
 		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "you must be a member of the group")
 	}
 
-	exists, err := repositories.Group.GroupExists(primitiveUserIds)
+	exists, err := repositories.Group.GroupExists(primitiveUserIds, organizationObjectID)
 	if err != nil {
 		log.Println(err)
 		return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
@@ -42,7 +58,7 @@ func CreateGroup(name string, userIds []string, authUserId string) (*models.Grou
 		groupName = &name
 	}
 
-	group, err := repositories.Group.CreateGroup(groupName, primitiveUserIds)
+	group, err := repositories.Group.CreateGroup(groupName, primitiveUserIds, organizationObjectID)
 
 	if err != nil {
 		log.Println(err)

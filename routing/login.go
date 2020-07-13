@@ -36,8 +36,17 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// get organizations
+	organizations, err := repositories.Organization.GetForUser(user.ID)
+	if err != nil {
+		utils.JsonError(http.StatusInternalServerError, "failed to get organizations", c)
+		return
+	}
+
+	// response
 	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"id":    user.ID,
+		"token":            token,
+		"id":               user.ID,
+		"has_organization": len(organizations) > 0,
 	})
 }

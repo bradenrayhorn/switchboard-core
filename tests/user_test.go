@@ -21,9 +21,10 @@ func TestUserSearch(t *testing.T) {
 	thomas, err := repositories.User.CreateUser("thomas", "")
 	assert.Nil(t, err)
 	token, _ := utils.CreateToken(george)
+	organization := makeTestOrganizations(t, []*models.User{george, thomas})
 
 	w := httptest.NewRecorder()
-	form := url.Values{"username": []string{"thom"}}
+	form := url.Values{"username": []string{"thom"}, "organization_id": []string{organization.ID.Hex()}}
 	req, _ := http.NewRequest("POST", "/api/users/search", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))

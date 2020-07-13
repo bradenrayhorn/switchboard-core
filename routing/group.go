@@ -19,7 +19,7 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
-	group, err := services.CreateGroup(request.GroupName, request.UserIds, c.GetString("user_id"))
+	group, err := services.CreateGroup(request.GroupName, request.UserIds, c.GetString("user_id"), request.OrganizationID)
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
@@ -106,9 +106,10 @@ func GetGroups(c *gin.Context) {
 			})
 		}
 		groupResponse = append(groupResponse, models.GroupResponse{
-			ID:    group.ID,
-			Name:  group.Name,
-			Users: userResponse,
+			ID:           group.ID,
+			Name:         group.Name,
+			Users:        userResponse,
+			Organization: group.Organization,
 		})
 	}
 
