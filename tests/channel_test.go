@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/bradenrayhorn/switchboard-core/models"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
@@ -28,6 +29,19 @@ func TestCreateChannel(t *testing.T) {
 	assert.Nil(t, repositories.User.DropAll())
 	assert.Nil(t, repositories.Group.DropAll())
 	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCannotCreateChannelWithoutParameters(t *testing.T) {
+	_, _, token := makeTestUsersAndToken(t)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/channels", nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
 }
 
 func TestCannotCreateChannelOutsideOrganization(t *testing.T) {
@@ -210,6 +224,29 @@ func TestCannotLeaveChannelNotIn(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestGetChannels(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
+
+	_ = makeTestChannelWithUser(organization.ID, false, user1)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/api/channels", nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var body struct {
+		Data []interface{}
+	}
+	_ = json.Unmarshal(w.Body.Bytes(), &body)
+	assert.Len(t, body.Data, 1)
 	assert.Nil(t, repositories.User.DropAll())
 	assert.Nil(t, repositories.Group.DropAll())
 	assert.Nil(t, repositories.Organization.DropAll())
