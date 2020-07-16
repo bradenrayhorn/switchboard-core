@@ -35,7 +35,7 @@ func TestCannotCreateChannelOutsideOrganization(t *testing.T) {
 	organization := makeTestOrganizations(t, []*models.User{user2})
 
 	w := httptest.NewRecorder()
-	json := []byte(`{"name":"test-channel","organization_id:` + organization.ID.Hex() + `","private":false}`)
+	json := []byte(`{"name":"test-channel","organization_id":"` + organization.ID.Hex() + `","private":false}`)
 	req, _ := http.NewRequest("POST", "/api/channels", bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -52,7 +52,7 @@ func TestCannotCreateChannelWithInvalidName(t *testing.T) {
 	organization := makeTestOrganizations(t, []*models.User{user1, user2})
 
 	w := httptest.NewRecorder()
-	json := []byte(`{"name":"test channel","organization_id:` + organization.ID.Hex() + `","private":false}`)
+	json := []byte(`{"name":"test channel","organization_id":"` + organization.ID.Hex() + `","private":false}`)
 	req, _ := http.NewRequest("POST", "/api/channels", bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -71,7 +71,7 @@ func TestCannotCreateChannelSameName(t *testing.T) {
 	makeTestChannel(organization.ID, false)
 
 	w := httptest.NewRecorder()
-	json := []byte(`{"name":"test-channel","organization_id:` + organization.ID.Hex() + `","private":false}`)
+	json := []byte(`{"name":"test-channel","organization_id":"` + organization.ID.Hex() + `","private":false}`)
 	req, _ := http.NewRequest("POST", "/api/channels", bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))

@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"github.com/bradenrayhorn/switchboard-core/database"
 	"github.com/bradenrayhorn/switchboard-core/repositories"
 	"github.com/bradenrayhorn/switchboard-core/services"
 	"github.com/bradenrayhorn/switchboard-core/utils"
@@ -17,12 +18,15 @@ func CreateChannel(c *gin.Context) {
 	}
 
 	userID := c.MustGet("user_id_object").(primitive.ObjectID)
-	_, err := services.CreateChannel(request.Name, request.Private, request.OrganizationID, userID, c.GetString("user_username"))
+	group, err := services.CreateChannel(request.Name, request.Private, request.OrganizationID, userID, c.GetString("user_username"))
 
 	if err != nil {
 		utils.JsonError(err.Code, err.Error.Error(), c)
 		return
 	}
+
+	redis := c.MustGet("redis").(*database.RedisDB)
+	redis.PublishGroupJoin(userID.Hex(), group.ID.Hex())
 }
 
 func GetChannels(c *gin.Context) {
@@ -50,6 +54,9 @@ func LeaveChannel(c *gin.Context) {
 		utils.JsonError(err.Code, err.Error.Error(), c)
 		return
 	}
+
+	redis := c.MustGet("redis").(*database.RedisDB)
+	redis.PublishGroupLeft(userID.Hex(), request.ChannelID.Hex())
 }
 
 func JoinChannel(c *gin.Context) {
@@ -66,4 +73,7 @@ func JoinChannel(c *gin.Context) {
 		utils.JsonError(err.Code, err.Error.Error(), c)
 		return
 	}
+
+	redis := c.MustGet("redis").(*database.RedisDB)
+	redis.PublishGroupJoin(userID.Hex(), request.ChannelID.Hex())
 }
