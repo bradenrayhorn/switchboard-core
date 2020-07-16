@@ -96,7 +96,6 @@ func TestCanJoinChannel(t *testing.T) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	r.ServeHTTP(w, req)
 
-	fmt.Println(w.Body)
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Nil(t, repositories.User.DropAll())
 	assert.Nil(t, repositories.Group.DropAll())
@@ -164,6 +163,58 @@ func TestCannotJoinChannelTwice(t *testing.T) {
 	assert.Nil(t, repositories.Organization.DropAll())
 }
 
+func TestCanLeaveChannel(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
+
+	channel := makeTestChannelWithUser(organization.ID, false, user1)
+
+	w := httptest.NewRecorder()
+	json := []byte(`{"channel_id":"` + channel.ID.Hex() + `"}`)
+	req, _ := http.NewRequest("POST", "/api/channels/leave", bytes.NewBuffer(json))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCannotLeaveInvalidChannel(t *testing.T) {
+	_, _, token := makeTestUsersAndToken(t)
+
+	w := httptest.NewRecorder()
+	json := []byte(`{"channel_id":"non-existing"}`)
+	req, _ := http.NewRequest("POST", "/api/channels/leave", bytes.NewBuffer(json))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+}
+
+func TestCannotLeaveChannelNotIn(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
+
+	channel := makeTestChannelWithUser(organization.ID, false, user2)
+
+	w := httptest.NewRecorder()
+	json := []byte(`{"channel_id":"` + channel.ID.Hex() + `"}`)
+	req, _ := http.NewRequest("POST", "/api/channels/leave", bytes.NewBuffer(json))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
 func makeTestUsersAndToken(t *testing.T) (*models.User, *models.User, string) {
 	user1, err := repositories.User.CreateUser("test1", "")
 	assert.Nil(t, err)
@@ -184,5 +235,15 @@ func makeTestChannel(organizationID primitive.ObjectID, private bool) *models.Gr
 		Type:         channelType,
 		Organization: organizationID,
 	})
+	return group
+}
+
+func makeTestChannelWithUser(organizationID primitive.ObjectID, private bool, user *models.User) *models.Group {
+	group := makeTestChannel(organizationID, private)
+	group.Users = append(group.Users, models.GroupUser{
+		ID:       user.ID,
+		Username: user.Username,
+	})
+	_ = repositories.Group.UpdateGroup(group)
 	return group
 }

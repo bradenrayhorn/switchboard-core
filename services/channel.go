@@ -81,7 +81,7 @@ func JoinChannel(channelID primitive.ObjectID, userID primitive.ObjectID, userna
 
 	err = repositories.Group.UpdateGroup(group)
 	if err != nil {
-		return utils.MakeHttpError(http.StatusInternalServerError, "failed to join group")
+		return utils.MakeHttpError(http.StatusInternalServerError, "failed to join channel")
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func LeaveChannel(channelID primitive.ObjectID, userID primitive.ObjectID) *util
 
 	err = repositories.Group.UpdateGroup(group)
 	if err != nil {
-		return utils.MakeHttpError(http.StatusInternalServerError, "failed to join group")
+		return utils.MakeHttpError(http.StatusInternalServerError, "failed to leave channel")
 	}
 	return nil
 }
