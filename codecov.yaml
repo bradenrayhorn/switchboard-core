@@ -1,3 +1,13 @@
 ignore:
   - "repositories/mocks"
   - "main.go"
+coverage:
+  status:
+    project:
+      default:
+        target: 65%
+        threshold: 5%
+        base: auto
+        branches:
+          - master
+    patch: off
