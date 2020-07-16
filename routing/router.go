@@ -28,9 +28,10 @@ func applyRoutes(router *gin.Engine) {
 
 	api.GET("/me", ShowMe)
 
-	api.GET("/groups", GetGroups)
-	api.POST("/groups/create", CreateGroup)
-	api.POST("/groups/update", UpdateGroup)
+	api.GET("/channels", GetChannels)
+	api.POST("/channels", CreateChannel)
+	api.POST("/channels/leave", LeaveChannel)
+	api.POST("/channels/join", JoinChannel)
 
 	api.GET("/organizations", GetOrganizations)
 	api.POST("/organizations", CreateOrganization)

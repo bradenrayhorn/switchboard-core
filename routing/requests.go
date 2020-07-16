@@ -1,5 +1,7 @@
 package routing
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 // auth
 
 type LoginRequest struct {
@@ -12,19 +14,20 @@ type RegisterRequest struct {
 	Password string `form:"password" binding:"required"`
 }
 
-// group
+// channels
 
-type CreateGroupRequest struct {
-	GroupName      string   `form:"name" json:"name"`
-	UserIds        []string `json:"users" form:"users" binding:"required"`
-	OrganizationID string   `form:"organization_id" json:"organization_id" binding:"required"`
+type CreateChannelRequest struct {
+	Name           string             `form:"name" json:"name" binding:"required"`
+	OrganizationID primitive.ObjectID `form:"organization_id" json:"organization_id" binding:"required"`
+	Private        bool               `form:"private" json:"private"`
 }
 
-type UpdateGroupRequest struct {
-	Id            string   `form:"id" json:"id"`
-	GroupName     string   `form:"name" json:"name"`
-	AddUserIds    []string `json:"add_users" form:"add_users"`
-	RemoveUserIds []string `json:"remove_users" form:"remove_users"`
+type LeaveChannelRequest struct {
+	ChannelID primitive.ObjectID `form:"channel_id" json:"channel_id" binding:"required"`
+}
+
+type JoinChannelRequest struct {
+	ChannelID primitive.ObjectID `form:"channel_id" json:"channel_id" binding:"required"`
 }
 
 // users

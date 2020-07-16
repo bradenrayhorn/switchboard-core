@@ -5,16 +5,25 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type GroupType string
+
+const (
+	GroupTypePublicChannel  GroupType = "public_channel"
+	GroupTypePrivateChannel           = "private_channel"
+	GroupTypePrivateMessage           = "private_message"
+)
+
 type Group struct {
 	mgm.DefaultModel `bson:",inline"`
-	Name             *string              `json:"name"`
-	UserIds          []primitive.ObjectID `json:"users" bson:"users"`
-	Organization     primitive.ObjectID   `json:"organization" bson:"organization"`
+	Name             *string            `json:"name"`
+	Type             GroupType          `json:"type"`
+	Users            []GroupUser        `json:"users" bson:"users"`
+	Organization     primitive.ObjectID `json:"organization" bson:"organization"`
 }
 
 type GroupUser struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID       primitive.ObjectID `json:"id"`
+	Username string             `json:"username"`
 }
 
 type GroupResponse struct {

@@ -53,19 +53,19 @@ func CreateGroup(name string, userIds []string, authUserId string, organizationI
 		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "group already exists")
 	}
 
-	var groupName *string = nil
-	if len(name) > 0 {
-		groupName = &name
-	}
+	// var groupName *string = nil
+	// if len(name) > 0 {
+	// 	groupName = &name
+	// }
 
-	group, err := repositories.Group.CreateGroup(groupName, primitiveUserIds, organizationObjectID)
+	// group, err := repositories.Group.CreateGroup(groupName, primitiveUserIds, organizationObjectID)
+	//
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
+	// }
 
-	if err != nil {
-		log.Println(err)
-		return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to create group")
-	}
-
-	return group, nil
+	return nil, nil
 }
 
 func UpdateGroup(id string, authUserId string, groupName string, usersToAdd []string, usersToRemove []string) *utils.HttpError {
@@ -115,33 +115,33 @@ func UpdateGroup(id string, authUserId string, groupName string, usersToAdd []st
 	}
 
 	// add users
-addLoop:
-	for _, toAdd := range userIdsToAdd {
-		for _, userId := range group.UserIds {
-			if userId == toAdd {
-				break addLoop
-			}
-		}
-		group.UserIds = append(group.UserIds, toAdd)
-	}
-
-	// remove users
-	for _, toRemove := range userIdsToRemove {
-		index := -1
-		for i, userId := range group.UserIds {
-			if userId == toRemove {
-				index = i
-				break
-			}
-		}
-		group.UserIds = append(group.UserIds[:index], group.UserIds[index+1:]...)
-	}
-
-	if len(group.UserIds) == 0 {
-		err = repositories.Group.DeleteGroup(group)
-	} else {
-		err = repositories.Group.UpdateGroup(group)
-	}
+	// addLoop:
+	// 	for _, toAdd := range userIdsToAdd {
+	// 		for _, userId := range group.UserIds {
+	// 			if userId == toAdd {
+	// 				break addLoop
+	// 			}
+	// 		}
+	// 		group.UserIds = append(group.UserIds, toAdd)
+	// 	}
+	//
+	// 	// remove users
+	// 	for _, toRemove := range userIdsToRemove {
+	// 		index := -1
+	// 		for i, userId := range group.UserIds {
+	// 			if userId == toRemove {
+	// 				index = i
+	// 				break
+	// 			}
+	// 		}
+	// 		group.UserIds = append(group.UserIds[:index], group.UserIds[index+1:]...)
+	// 	}
+	//
+	// 	if len(group.UserIds) == 0 {
+	// 		err = repositories.Group.DeleteGroup(group)
+	// 	} else {
+	// 		err = repositories.Group.UpdateGroup(group)
+	// 	}
 
 	if err != nil {
 		return utils.MakeHttpError(http.StatusInternalServerError, "failed to update group")
