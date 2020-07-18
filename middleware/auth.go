@@ -4,6 +4,7 @@ import (
 	"github.com/bradenrayhorn/switchboard-core/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,7 +35,16 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
+
+		parsedID, err := primitive.ObjectIDFromHex(claims["user_id"].(string))
+		if err != nil {
+			utils.JsonError(http.StatusUnauthorized, "invalid user id", c)
+			c.Abort()
+			return
+		}
+
 		c.Set("user_id", claims["user_id"])
+		c.Set("user_id_object", parsedID)
 		c.Set("user_username", claims["user_username"])
 		c.Next()
 	}
