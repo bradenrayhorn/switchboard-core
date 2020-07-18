@@ -259,7 +259,7 @@ func TestGetChannelsForOrganization(t *testing.T) {
 	_ = makeTestChannelWithUser(organization.ID, false, user2)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/api/organizations/%s/channels", organization.ID), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/api/organizations/%s/channels", organization.ID.Hex()), nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	r.ServeHTTP(w, req)
@@ -282,7 +282,7 @@ func TestCannotGetChannelsForOtherOrganization(t *testing.T) {
 	_ = makeTestChannelWithUser(organization.ID, false, user2)
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/api/organizations/%s/channels", organization.ID), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/api/organizations/%s/channels", organization.ID.Hex()), nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	r.ServeHTTP(w, req)
