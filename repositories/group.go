@@ -12,6 +12,7 @@ type GroupRepository interface {
 	GetGroups(userId primitive.ObjectID) ([]models.Group, error)
 	ExistsByName(groupName string, organizationID primitive.ObjectID) (bool, error)
 	GetByID(groupID primitive.ObjectID) (*models.Group, error)
+	GetByOrganization(organizationID primitive.ObjectID, groupType models.GroupType) ([]models.Group, error)
 	UpdateGroup(group *models.Group) error
 	DropAll() error
 }
@@ -64,6 +65,21 @@ func (m MongoGroupRepository) GetByID(groupID primitive.ObjectID) (*models.Group
 	}
 
 	return group, err
+}
+
+func (m MongoGroupRepository) GetByOrganization(organizationID primitive.ObjectID, groupType models.GroupType) ([]models.Group, error) {
+	var groups = make([]models.Group, 0)
+	cursor, err := mgm.Coll(&models.Group{}).Find(mgm.Ctx(), bson.M{
+		"organization": organizationID,
+		"type":         groupType,
+	})
+	if err != nil {
+		return groups, err
+	}
+
+	err = cursor.All(mgm.Ctx(), &groups)
+
+	return groups, nil
 }
 
 func (m MongoGroupRepository) UpdateGroup(group *models.Group) error {

@@ -40,6 +40,22 @@ func GetChannels(c *gin.Context) {
 	}
 }
 
+func GetChannelsInOrganization(c *gin.Context) {
+	var request GetChannelsForOrganizationRequest
+	if err := c.ShouldBindUri(&request); err != nil {
+		utils.JsonError(http.StatusUnprocessableEntity, err.Error(), c)
+		return
+	}
+	organizationID, _ := primitive.ObjectIDFromHex(request.OrganizationID)
+	channels, err := services.GetChannelsForOrganization(organizationID, c.MustGet("user_id_object").(primitive.ObjectID))
+	if err != nil {
+		utils.JsonError(err.Code, err.Error.Error(), c)
+		return
+	} else {
+		c.JSON(http.StatusOK, utils.Json{"data": channels})
+	}
+}
+
 func LeaveChannel(c *gin.Context) {
 	var request LeaveChannelRequest
 	if err := c.ShouldBind(&request); err != nil {

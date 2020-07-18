@@ -36,6 +36,7 @@ func applyRoutes(router *gin.Engine) {
 	api.GET("/organizations", GetOrganizations)
 	api.POST("/organizations", CreateOrganization)
 	api.POST("/organizations/invite-user", AddUserToOrganization)
+	api.GET("/organizations/:organization/channels", GetChannelsInOrganization)
 
 	api.POST("/users/search", SearchUsers)
 }

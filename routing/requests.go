@@ -39,6 +39,10 @@ type UserSearchRequest struct {
 
 // organizations
 
+type GetChannelsForOrganizationRequest struct {
+	OrganizationID string `uri:"organization" binding:"required"`
+}
+
 type CreateOrganizationRequest struct {
 	Name string `form:"name" json:"name" binding:"required"`
 }

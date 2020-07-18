@@ -118,3 +118,18 @@ func LeaveChannel(channelID primitive.ObjectID, userID primitive.ObjectID) *util
 	}
 	return nil
 }
+
+func GetChannelsForOrganization(organizationID primitive.ObjectID, userID primitive.ObjectID) ([]models.Group, *utils.HttpError) {
+	// verify user is in organization
+	organization, err := repositories.Organization.GetForUserAndID(organizationID, userID)
+	if err != nil || organization == nil {
+		return nil, utils.MakeHttpError(http.StatusUnprocessableEntity, "you do not have access to that organization")
+	}
+
+	// get channels for organization
+	groups, err := repositories.Group.GetByOrganization(organizationID, models.GroupTypePublicChannel)
+	if err != nil {
+		return nil, utils.MakeHttpError(http.StatusInternalServerError, "failed to get channels")
+	}
+	return groups, nil
+}

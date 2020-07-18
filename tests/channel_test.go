@@ -252,6 +252,52 @@ func TestGetChannels(t *testing.T) {
 	assert.Nil(t, repositories.Organization.DropAll())
 }
 
+func TestGetChannelsForOrganization(t *testing.T) {
+	user1, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user1, user2})
+
+	_ = makeTestChannelWithUser(organization.ID, false, user2)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/api/organizations/%s/channels", organization.ID), nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	var body struct {
+		Data []interface{}
+	}
+	_ = json.Unmarshal(w.Body.Bytes(), &body)
+	assert.Len(t, body.Data, 1)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
+func TestCannotGetChannelsForOtherOrganization(t *testing.T) {
+	_, user2, token := makeTestUsersAndToken(t)
+	organization := makeTestOrganizations(t, []*models.User{user2})
+
+	_ = makeTestChannelWithUser(organization.ID, false, user2)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/api/organizations/%s/channels", organization.ID), nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
+	var body struct {
+		Data []interface{}
+	}
+	_ = json.Unmarshal(w.Body.Bytes(), &body)
+	assert.Len(t, body.Data, 1)
+	assert.Nil(t, repositories.User.DropAll())
+	assert.Nil(t, repositories.Group.DropAll())
+	assert.Nil(t, repositories.Organization.DropAll())
+}
+
 func makeTestUsersAndToken(t *testing.T) (*models.User, *models.User, string) {
 	user1, err := repositories.User.CreateUser("test1", "")
 	assert.Nil(t, err)
