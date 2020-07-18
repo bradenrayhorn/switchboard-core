@@ -288,11 +288,6 @@ func TestCannotGetChannelsForOtherOrganization(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
-	var body struct {
-		Data []interface{}
-	}
-	_ = json.Unmarshal(w.Body.Bytes(), &body)
-	assert.Len(t, body.Data, 1)
 	assert.Nil(t, repositories.User.DropAll())
 	assert.Nil(t, repositories.Group.DropAll())
 	assert.Nil(t, repositories.Organization.DropAll())
