@@ -10,8 +10,8 @@ require (
 	github.com/go-redis/redis/v8 v8.0.0-beta.6
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.6.1
-	go.mongodb.org/mongo-driver v1.1.3
-	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
+	go.mongodb.org/mongo-driver v1.5.1
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.24.0 // indirect
 )
